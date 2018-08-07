@@ -32,7 +32,6 @@ closeCreatePostModalButton.addEventListener('click', closeCreatePostModal);
 function createCard() {
   var cardWrapper = document.createElement('div');
   cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
-  cardWrapper.style.marginLeft = '15px';
   var cardTitle = document.createElement('div');
   cardTitle.className = 'mdl-card__title';
   cardTitle.style.backgroundImage = 'url("/src/images/sf-boat.jpg")';
@@ -42,6 +41,7 @@ function createCard() {
   var cardTitleTextElement = document.createElement('h2');
   cardTitleTextElement.className = 'mdl-card__title-text';
   cardTitleTextElement.textContent = 'San Francisco Trip';
+  cardTitleTextElement.style.color = 'white';
   cardTitle.appendChild(cardTitleTextElement);
   var cardSupportingText = document.createElement('div');
   cardSupportingText.className = 'mdl-card__supporting-text';
@@ -49,6 +49,8 @@ function createCard() {
   cardSupportingText.style.textAlign = 'center';
   cardWrapper.appendChild(cardSupportingText);
   componentHandler.upgradeElement(cardWrapper);
+  sharedMomentsArea.style.display = 'flex';
+  sharedMomentsArea.style.justifyContent = 'center';
   sharedMomentsArea.appendChild(cardWrapper);
 }
 
