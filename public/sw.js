@@ -1,12 +1,6 @@
-const CACHE_STATIC_NAME = 'static-v14';
+const CACHE_STATIC_NAME = 'static-v13';
 const CACHE_DYNAMIC_NAME = 'dynamic-v2';
-self.addEventListener('install', function(event) {
-	console.log('[Service Worker] Installing Service Worker ...', event);
-	event.waitUntil(
-		caches.open(CACHE_STATIC_NAME)
-			.then(function(cache) {
-				console.log('[Service Worker] PreCaching App Shell');
-				cache.addAll([
+const STATIC_FILES = [
 					'/',
 					'/index.html',
 					'/offline.html',
@@ -21,7 +15,15 @@ self.addEventListener('install', function(event) {
 					'https://fonts.googleapis.com/css?family=Roboto:400,700',
 					'https://fonts.googleapis.com/icon?family=Material+Icons',
 					'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css',
-				]);
+				];
+
+self.addEventListener('install', function(event) {
+	console.log('[Service Worker] Installing Service Worker ...', event);
+	event.waitUntil(
+		caches.open(CACHE_STATIC_NAME)
+			.then(function(cache) {
+				console.log('[Service Worker] PreCaching App Shell');
+				cache.addAll(STATIC_FILES);
 			})
 	);
 });
@@ -42,7 +44,17 @@ self.addEventListener('activate', function(event) {
 	return self.clients.claim();
 });
 
+// helper function to check route
+function isInArray(string, array) {
+	for (var i = 0; i < array.length ; i++) {
+		if (array[i] === string) {
+			return true;
+		}
+		return false
+	}
+}
 // Cache-then-Network strategy in if
+// Cache-only strategy in else if
 // Cache-with-network-fallback in else
 self.addEventListener('fetch', function(event) {
 	var url = 'https://httpbin.org/get';
@@ -56,6 +68,10 @@ self.addEventListener('fetch', function(event) {
 							return res;
 						});
 				})
+		);
+	} else if (isInArray(event.request.url, STATIC_FILES)) {
+		event.respondWith(
+		 caches.match(event.request)
 		);
 	} else {
 		event.respondWith(
@@ -75,7 +91,9 @@ self.addEventListener('fetch', function(event) {
 							.catch(function(err) {
 								return caches.open(CACHE_STATIC_NAME)
 									.then(function(cache) {
-										return cache.match('/offline.html');
+										if(event.request.url.indexOf('/help')) {
+											return cache.match('/offline.html');
+										}
 									});
 							});
 					}
@@ -131,13 +149,13 @@ self.addEventListener('fetch', function(event) {
 // Cache-only strategy
 /*self.addEventListener('fetch', function(event) {
 	event.respondWith(
-		return caches.match(event.request)
+		caches.match(event.request)
 	);
 });*/
 
 // Network-only strategy
 /*self.addEventListener('fetch', function(event) {
 	event.respondWith(
-		return fetch(event.request)
+		fetch(event.request)
 	);
 });*/
